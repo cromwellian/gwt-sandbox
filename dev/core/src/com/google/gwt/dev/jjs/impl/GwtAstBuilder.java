@@ -989,7 +989,9 @@ public class GwtAstBuilder {
            * }
            */
 
-          JInterfaceType funcType = (JInterfaceType) typeMap.get(x.expectedType());
+          SourceTypeBinding binding = (SourceTypeBinding) x.expectedType();
+          JMethod interfaceMethod = typeMap.get(binding.methods()[0]);
+          JInterfaceType funcType = (JInterfaceType) interfaceMethod.getEnclosingType();
           SourceInfo info = makeSourceInfo(x);
           JClassType innerLambda = new JClassType(info,
                   new String(x.binding.selector) + "$Type",false, true);
@@ -1058,54 +1060,51 @@ public class GwtAstBuilder {
 
           JMethod lambdaMethod = curMethod.method;
 
-          JExpression expr = (JExpression) pop();
+          JNode node = pop();
           JMethodBody body = (JMethodBody) curMethod.method.getBody();
-          body.getBlock().addStmt(expr.makeStatement());
+          JStatement lambdaStatement = node instanceof JExpression ?
+                  ((JExpression) node).makeStatement() : (JStatement) node;
+          body.getBlock().addStmt(lambdaStatement);
           lambdaMethod.setBody(body);
 
-          for (JMethod m : funcType.getMethods()) {
-              if (m.getName().equals("$clinit")) {
-                  continue;
-              }
-              JMethod samMethod = new JMethod(info, m.getName(),
-                      innerLambda, m.getOriginalReturnType(),
-                      false, false, true, m.getAccess());
-              for (JParameter origParam : m.getParams()) {
-                  samMethod.addParam(new JParameter(origParam.getSourceInfo(),
-                          origParam.getName(),origParam.getType(),
-                          origParam.isFinal(), origParam.isThis(),
-                          samMethod));
-              }
-              JMethodBody samMethodBody = new JMethodBody(info);
-              JMethodCall samCall = new JMethodCall(info, new JFieldRef(info,
-                      new JThisRef(info, innerLambda), outerField, innerLambda),
-                      lambdaMethod);
-              for (JField localField : locals) {
-                  samCall.addArg(new JFieldRef(info, new JThisRef(info, innerLambda),
-                          localField, innerLambda));
-              }
-              for (JParameter param : samMethod.getParams()) {
-                  samCall.addArg(new JParameterRef(info, param));
-              }
-              if (samMethod.getOriginalReturnType() != JPrimitiveType.VOID) {
-                  samMethodBody.getBlock().addStmt(new JReturnStatement(info, samCall));
-              } else {
-                  samMethodBody.getBlock().addStmt(samCall.makeStatement());
-              }
-              samMethod.setBody(samMethodBody);
-              innerLambda.addMethod(samMethod);
-              JNewInstance allocLambda = new JNewInstance(info, ctor, innerLambda);
-              allocLambda.addArg(new JThisRef(info, (JClassType) outerField.getEnclosingType()));
-              for (SyntheticArgumentBinding sa : synthArgs) {
-                  allocLambda.addArg(makeLocalRef(info, sa.actualOuterLocalVariable, methodStack.peek()));
-              }
-              ctor.freezeParamTypes();
-              samMethod.freezeParamTypes();
-              push(allocLambda);
-              popMethodInfo();
-              newTypes.add(innerLambda);
-              break;
+
+          JMethod samMethod = new JMethod(info, interfaceMethod.getName(),
+                  innerLambda, interfaceMethod.getOriginalReturnType(),
+                  false, false, true, interfaceMethod.getAccess());
+          for (JParameter origParam : interfaceMethod.getParams()) {
+              samMethod.addParam(new JParameter(origParam.getSourceInfo(),
+                      origParam.getName(),origParam.getType(),
+                      origParam.isFinal(), origParam.isThis(),
+                      samMethod));
           }
+          JMethodBody samMethodBody = new JMethodBody(info);
+          JMethodCall samCall = new JMethodCall(info, new JFieldRef(info,
+                  new JThisRef(info, innerLambda), outerField, innerLambda),
+                  lambdaMethod);
+          for (JField localField : locals) {
+              samCall.addArg(new JFieldRef(info, new JThisRef(info, innerLambda),
+                      localField, innerLambda));
+          }
+          for (JParameter param : samMethod.getParams()) {
+              samCall.addArg(new JParameterRef(info, param));
+          }
+          if (samMethod.getOriginalReturnType() != JPrimitiveType.VOID) {
+              samMethodBody.getBlock().addStmt(new JReturnStatement(info, samCall));
+          } else {
+              samMethodBody.getBlock().addStmt(samCall.makeStatement());
+          }
+          samMethod.setBody(samMethodBody);
+          innerLambda.addMethod(samMethod);
+          JNewInstance allocLambda = new JNewInstance(info, ctor, innerLambda);
+          allocLambda.addArg(new JThisRef(info, (JClassType) outerField.getEnclosingType()));
+          for (SyntheticArgumentBinding sa : synthArgs) {
+              allocLambda.addArg(makeLocalRef(info, sa.actualOuterLocalVariable, methodStack.peek()));
+          }
+          ctor.freezeParamTypes();
+          samMethod.freezeParamTypes();
+          push(allocLambda);
+          popMethodInfo();
+          newTypes.add(innerLambda);
       }
 
       @Override

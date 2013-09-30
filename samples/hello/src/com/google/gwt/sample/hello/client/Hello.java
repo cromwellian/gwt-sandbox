@@ -21,14 +21,24 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.RootPanel;
 
+import static com.google.gwt.user.client.Window.alert;
+
 /**
  * HelloWorld application.
  */
 public class Hello implements EntryPoint {
-
+  float field = 22;
+  static double sfield = 80;
   public void onModuleLoad() {
     int  localx = 42;
-    Button b = new Button("Click me", (ClickEvent event) -> Window.alert("hello " + event + localx));
+    Button b = new Button("Click me", (ClickEvent event) -> {
+        int innerLocal = 10;
+        Runnable r = () -> {
+          alert("hello " + event + localx + field);
+          alert("world " + event + localx + sfield + innerLocal);
+        };
+        r.run();
+    });
 
     RootPanel.get().add(b);
   }
