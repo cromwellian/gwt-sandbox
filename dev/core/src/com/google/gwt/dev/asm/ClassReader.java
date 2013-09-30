@@ -166,9 +166,9 @@ public class ClassReader {
     public ClassReader(final byte[] b, final int off, final int len) {
         this.b = b;
         // checks the class version
-        if (readShort(off + 6) > Opcodes.V1_7) {
-            throw new IllegalArgumentException();
-        }
+//        if (readShort(off + 6) > Opcodes.V1_7) {
+//            throw new IllegalArgumentException();
+//        }
         // parses the constant pool
         items = new int[readUnsignedShort(off + 8)];
         int n = items.length;

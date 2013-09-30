@@ -17,6 +17,6 @@
 	<entry-point class="com.google.gwt.sample.hello.client.Hello"/>
 
     <!-- Changing the linker is only necessary if you want to try out SuperDevMode -->
-    <add-linker name="xsiframe"/>
+    <add-linker name="xs"/>
     <set-configuration-property name="devModeRedirectEnabled" value="true"/>
 </module>

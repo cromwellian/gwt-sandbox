@@ -21,74 +21,8 @@ import com.google.gwt.dev.jdt.SafeASTVisitor;
 import com.google.gwt.dev.jjs.InternalCompilerException;
 import com.google.gwt.dev.jjs.SourceInfo;
 import com.google.gwt.dev.jjs.SourceOrigin;
-import com.google.gwt.dev.jjs.ast.AccessModifier;
-import com.google.gwt.dev.jjs.ast.JAbsentArrayDimension;
-import com.google.gwt.dev.jjs.ast.JArrayLength;
-import com.google.gwt.dev.jjs.ast.JArrayRef;
-import com.google.gwt.dev.jjs.ast.JArrayType;
-import com.google.gwt.dev.jjs.ast.JAssertStatement;
-import com.google.gwt.dev.jjs.ast.JBinaryOperation;
-import com.google.gwt.dev.jjs.ast.JBinaryOperator;
-import com.google.gwt.dev.jjs.ast.JBlock;
-import com.google.gwt.dev.jjs.ast.JBooleanLiteral;
-import com.google.gwt.dev.jjs.ast.JBreakStatement;
-import com.google.gwt.dev.jjs.ast.JCaseStatement;
-import com.google.gwt.dev.jjs.ast.JCastOperation;
-import com.google.gwt.dev.jjs.ast.JCharLiteral;
-import com.google.gwt.dev.jjs.ast.JClassLiteral;
-import com.google.gwt.dev.jjs.ast.JClassType;
-import com.google.gwt.dev.jjs.ast.JConditional;
-import com.google.gwt.dev.jjs.ast.JConstructor;
-import com.google.gwt.dev.jjs.ast.JContinueStatement;
-import com.google.gwt.dev.jjs.ast.JDeclarationStatement;
-import com.google.gwt.dev.jjs.ast.JDeclaredType;
-import com.google.gwt.dev.jjs.ast.JDoStatement;
-import com.google.gwt.dev.jjs.ast.JDoubleLiteral;
-import com.google.gwt.dev.jjs.ast.JEnumField;
-import com.google.gwt.dev.jjs.ast.JEnumType;
-import com.google.gwt.dev.jjs.ast.JExpression;
-import com.google.gwt.dev.jjs.ast.JExpressionStatement;
-import com.google.gwt.dev.jjs.ast.JField;
+import com.google.gwt.dev.jjs.ast.*;
 import com.google.gwt.dev.jjs.ast.JField.Disposition;
-import com.google.gwt.dev.jjs.ast.JFieldRef;
-import com.google.gwt.dev.jjs.ast.JFloatLiteral;
-import com.google.gwt.dev.jjs.ast.JForStatement;
-import com.google.gwt.dev.jjs.ast.JIfStatement;
-import com.google.gwt.dev.jjs.ast.JInstanceOf;
-import com.google.gwt.dev.jjs.ast.JIntLiteral;
-import com.google.gwt.dev.jjs.ast.JInterfaceType;
-import com.google.gwt.dev.jjs.ast.JLabel;
-import com.google.gwt.dev.jjs.ast.JLabeledStatement;
-import com.google.gwt.dev.jjs.ast.JLiteral;
-import com.google.gwt.dev.jjs.ast.JLocal;
-import com.google.gwt.dev.jjs.ast.JLocalRef;
-import com.google.gwt.dev.jjs.ast.JLongLiteral;
-import com.google.gwt.dev.jjs.ast.JMethod;
-import com.google.gwt.dev.jjs.ast.JMethodBody;
-import com.google.gwt.dev.jjs.ast.JMethodCall;
-import com.google.gwt.dev.jjs.ast.JNewArray;
-import com.google.gwt.dev.jjs.ast.JNewInstance;
-import com.google.gwt.dev.jjs.ast.JNode;
-import com.google.gwt.dev.jjs.ast.JNullLiteral;
-import com.google.gwt.dev.jjs.ast.JNullType;
-import com.google.gwt.dev.jjs.ast.JParameter;
-import com.google.gwt.dev.jjs.ast.JParameterRef;
-import com.google.gwt.dev.jjs.ast.JPostfixOperation;
-import com.google.gwt.dev.jjs.ast.JPrefixOperation;
-import com.google.gwt.dev.jjs.ast.JPrimitiveType;
-import com.google.gwt.dev.jjs.ast.JProgram;
-import com.google.gwt.dev.jjs.ast.JReferenceType;
-import com.google.gwt.dev.jjs.ast.JReturnStatement;
-import com.google.gwt.dev.jjs.ast.JStatement;
-import com.google.gwt.dev.jjs.ast.JStringLiteral;
-import com.google.gwt.dev.jjs.ast.JSwitchStatement;
-import com.google.gwt.dev.jjs.ast.JThisRef;
-import com.google.gwt.dev.jjs.ast.JThrowStatement;
-import com.google.gwt.dev.jjs.ast.JTryStatement;
-import com.google.gwt.dev.jjs.ast.JType;
-import com.google.gwt.dev.jjs.ast.JUnaryOperator;
-import com.google.gwt.dev.jjs.ast.JVariable;
-import com.google.gwt.dev.jjs.ast.JWhileStatement;
 import com.google.gwt.dev.jjs.ast.js.JsniClassLiteral;
 import com.google.gwt.dev.jjs.ast.js.JsniFieldRef;
 import com.google.gwt.dev.jjs.ast.js.JsniMethodBody;
@@ -105,82 +39,7 @@ import com.google.gwt.dev.js.ast.JsParameter;
 import com.google.gwt.dev.util.StringInterner;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
-import org.eclipse.jdt.internal.compiler.ast.AND_AND_Expression;
-import org.eclipse.jdt.internal.compiler.ast.ASTNode;
-import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.AllocationExpression;
-import org.eclipse.jdt.internal.compiler.ast.AnnotationMethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.Argument;
-import org.eclipse.jdt.internal.compiler.ast.ArrayAllocationExpression;
-import org.eclipse.jdt.internal.compiler.ast.ArrayInitializer;
-import org.eclipse.jdt.internal.compiler.ast.ArrayReference;
-import org.eclipse.jdt.internal.compiler.ast.AssertStatement;
-import org.eclipse.jdt.internal.compiler.ast.Assignment;
-import org.eclipse.jdt.internal.compiler.ast.BinaryExpression;
-import org.eclipse.jdt.internal.compiler.ast.Block;
-import org.eclipse.jdt.internal.compiler.ast.BreakStatement;
-import org.eclipse.jdt.internal.compiler.ast.CaseStatement;
-import org.eclipse.jdt.internal.compiler.ast.CastExpression;
-import org.eclipse.jdt.internal.compiler.ast.CharLiteral;
-import org.eclipse.jdt.internal.compiler.ast.ClassLiteralAccess;
-import org.eclipse.jdt.internal.compiler.ast.Clinit;
-import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.CompoundAssignment;
-import org.eclipse.jdt.internal.compiler.ast.ConditionalExpression;
-import org.eclipse.jdt.internal.compiler.ast.ConstructorDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.ContinueStatement;
-import org.eclipse.jdt.internal.compiler.ast.DoStatement;
-import org.eclipse.jdt.internal.compiler.ast.DoubleLiteral;
-import org.eclipse.jdt.internal.compiler.ast.EmptyStatement;
-import org.eclipse.jdt.internal.compiler.ast.EqualExpression;
-import org.eclipse.jdt.internal.compiler.ast.ExplicitConstructorCall;
-import org.eclipse.jdt.internal.compiler.ast.Expression;
-import org.eclipse.jdt.internal.compiler.ast.ExtendedStringLiteral;
-import org.eclipse.jdt.internal.compiler.ast.FalseLiteral;
-import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.FieldReference;
-import org.eclipse.jdt.internal.compiler.ast.FloatLiteral;
-import org.eclipse.jdt.internal.compiler.ast.ForStatement;
-import org.eclipse.jdt.internal.compiler.ast.ForeachStatement;
-import org.eclipse.jdt.internal.compiler.ast.IfStatement;
-import org.eclipse.jdt.internal.compiler.ast.Initializer;
-import org.eclipse.jdt.internal.compiler.ast.InstanceOfExpression;
-import org.eclipse.jdt.internal.compiler.ast.IntLiteral;
-import org.eclipse.jdt.internal.compiler.ast.LabeledStatement;
-import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.LongLiteral;
-import org.eclipse.jdt.internal.compiler.ast.MarkerAnnotation;
-import org.eclipse.jdt.internal.compiler.ast.MessageSend;
-import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.NameReference;
-import org.eclipse.jdt.internal.compiler.ast.NormalAnnotation;
-import org.eclipse.jdt.internal.compiler.ast.NullLiteral;
-import org.eclipse.jdt.internal.compiler.ast.OR_OR_Expression;
-import org.eclipse.jdt.internal.compiler.ast.OperatorIds;
-import org.eclipse.jdt.internal.compiler.ast.PostfixExpression;
-import org.eclipse.jdt.internal.compiler.ast.PrefixExpression;
-import org.eclipse.jdt.internal.compiler.ast.QualifiedAllocationExpression;
-import org.eclipse.jdt.internal.compiler.ast.QualifiedNameReference;
-import org.eclipse.jdt.internal.compiler.ast.QualifiedSuperReference;
-import org.eclipse.jdt.internal.compiler.ast.QualifiedThisReference;
-import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
-import org.eclipse.jdt.internal.compiler.ast.SingleMemberAnnotation;
-import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
-import org.eclipse.jdt.internal.compiler.ast.Statement;
-import org.eclipse.jdt.internal.compiler.ast.StringLiteral;
-import org.eclipse.jdt.internal.compiler.ast.StringLiteralConcatenation;
-import org.eclipse.jdt.internal.compiler.ast.SuperReference;
-import org.eclipse.jdt.internal.compiler.ast.SwitchStatement;
-import org.eclipse.jdt.internal.compiler.ast.SynchronizedStatement;
-import org.eclipse.jdt.internal.compiler.ast.ThisReference;
-import org.eclipse.jdt.internal.compiler.ast.ThrowStatement;
-import org.eclipse.jdt.internal.compiler.ast.TrueLiteral;
-import org.eclipse.jdt.internal.compiler.ast.TryStatement;
-import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.TypeReference;
-import org.eclipse.jdt.internal.compiler.ast.UnaryExpression;
-import org.eclipse.jdt.internal.compiler.ast.UnionTypeReference;
-import org.eclipse.jdt.internal.compiler.ast.WhileStatement;
+import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
@@ -1075,7 +934,149 @@ public class GwtAstBuilder {
       }
     }
 
-    @Override
+      @Override
+      public boolean visit(LambdaExpression x, BlockScope blockScope) {
+          SyntheticArgumentBinding[] synthArgs = null;
+
+          try {
+              Field f = LambdaExpression.class.getDeclaredField("outerLocalVariables");
+              f.setAccessible(true);
+              synthArgs = (SyntheticArgumentBinding[]) f.get(x);
+
+          } catch (Exception e) {
+          }
+          String paramNames[];
+          paramNames = new String[x.binding.parameters.length];
+          int numSynthArgs = synthArgs != null ? synthArgs.length : 0;
+          for (int i = 0; i < paramNames.length; i++) {
+              if (i < numSynthArgs) {
+                  paramNames[i] = new String(synthArgs[i].actualOuterLocalVariable.name);
+              } else {
+                  paramNames[i] = new String(x.arguments[i - numSynthArgs].name);
+              }
+          }
+          SourceInfo info = makeSourceInfo(x);
+          JMethod lambdaMethod = createSyntheticMethodFromBinding(info, x.binding,
+                  paramNames);
+          JMethodBody methodBody = new JMethodBody(info);
+          lambdaMethod.setBody(methodBody);
+          pushMethodInfo(new MethodInfo(lambdaMethod, methodBody, x.scope));
+          return true;
+      }
+
+      @Override
+      public void endVisit(LambdaExpression x, BlockScope blockScope) {
+
+          /**
+           * class Enclosing {
+           *
+           *   T lambda$0(locals, args) {...lambda expr }
+           *
+           *   class lambda$0$type implements I {
+           *       ctor(outer, locals) { ... }
+           *       R <SAM lambdaMethod>(args) { return outer.lambda$0(locals, args); }
+           *   }
+           * }
+           */
+
+          JInterfaceType funcType = (JInterfaceType) typeMap.get(x.expectedType());
+          SourceInfo info = makeSourceInfo(x);
+          JClassType innerLambda = new JClassType(info,
+                  new String(x.binding.selector) + "$Type",false, true);
+          innerLambda.setEnclosingType((JDeclaredType) typeMap.get(x.binding.declaringClass));
+          innerLambda.addImplements(funcType);
+          innerLambda.setSuperClass(javaLangObject);
+          JConstructor ctor = new JConstructor(info,
+                  (JClassType) innerLambda.getEnclosingType());
+          JParameter outerParam = new JParameter(info, "outer", innerLambda.getEnclosingType(),
+                  true, false, ctor);
+          ctor.addParam(outerParam);
+          JField outerField = new JField(info, "$$outer", innerLambda,
+                  innerLambda.getEnclosingType(), false, Disposition.NONE);
+          innerLambda.addField(outerField);
+
+          JMethodBody ctorBody = new JMethodBody(info);
+
+          List<JField> locals = new ArrayList<JField>();
+          SyntheticArgumentBinding[] synthArgs = null;
+
+          try {
+              Field f = LambdaExpression.class.getDeclaredField("outerLocalVariables");
+              f.setAccessible(true);
+              synthArgs = (SyntheticArgumentBinding[]) f.get(x);
+
+          } catch (Exception e) {
+          }
+          String paramNames[];
+          paramNames = new String[x.binding.parameters.length];
+          int numSynthArgs = synthArgs != null ? synthArgs.length : 0;
+
+          for (int i = 0; i < paramNames.length; i++) {
+              if (i < numSynthArgs) {
+                paramNames[i] = new String(synthArgs[i].actualOuterLocalVariable.name);
+                  JType localType = typeMap.get(synthArgs[i].type);
+                  JParameter jParam = new JParameter(info, paramNames[i],
+                          localType, true, false, ctor);
+                  ctor.addParam(jParam);
+                  JField jField = new JField(info, paramNames[i], innerLambda,
+                          localType, false, Disposition.NONE);
+                  locals.add(jField);
+                  innerLambda.addField(jField);
+                  JThisRef jThis = new JThisRef(info, innerLambda);
+                  JFieldRef jFieldRef = new JFieldRef(info, jThis, jField, innerLambda);
+                  JParameterRef jParamRef = new JParameterRef(info, jParam);
+                  ctorBody.getBlock().addStmt(
+                          new JBinaryOperation(info, jFieldRef.getType(),
+                                  JBinaryOperator.ASG,
+                          jFieldRef, jParamRef).makeStatement());
+              } else {
+                  paramNames[i] = new String(x.arguments[i - numSynthArgs].name);
+              }
+          }
+          ctor.setBody(ctorBody);
+          innerLambda.addMethod(ctor);
+
+          JMethod lambdaMethod = createSyntheticMethodFromBinding(info, x.binding,
+                  paramNames);
+          JExpression expr = (JExpression) pop();
+          JMethodBody body = (JMethodBody) curMethod.method.getBody();
+          body.getBlock().addStmt(expr.makeStatement());
+          lambdaMethod.setBody(body);
+
+          for (JMethod m : funcType.getMethods()) {
+              JMethod samMethod = new JMethod(info, m.getName(),
+                      innerLambda.getEnclosingType(), m.getOriginalReturnType(),
+                      false, false, true, m.getAccess());
+              for (JParameter origParam : m.getParams()) {
+                  samMethod.addParam(new JParameter(origParam.getSourceInfo(),
+                          origParam.getName(),origParam.getType(),
+                          origParam.isFinal(), origParam.isThis(),
+                          samMethod));
+              }
+              JMethodBody samMethodBody = new JMethodBody(info);
+              JMethodCall samCall = new JMethodCall(info, new JFieldRef(info,
+                      new JThisRef(info, innerLambda), outerField, innerLambda),
+                      lambdaMethod);
+              for (JField localField : locals) {
+                  samCall.addArg(new JFieldRef(info, new JThisRef(info, innerLambda),
+                          localField, innerLambda));
+              }
+              for (JParameter param : samMethod.getParams()) {
+                  samCall.addArg(new JParameterRef(info, param));
+              }
+              if (samMethod.getOriginalReturnType() != JPrimitiveType.VOID) {
+                  samMethodBody.getBlock().addStmt(new JReturnStatement(info, samCall));
+              } else {
+                  samMethodBody.getBlock().addStmt(samCall.makeStatement());
+              }
+              innerLambda.addMethod(samMethod);
+              JNewInstance allocLambda = new JNewInstance(info, ctor, innerLambda);
+              push(allocLambda);
+              break;
+          }
+      }
+
+      @Override
     public void endVisit(LocalDeclaration x, BlockScope scope) {
       try {
         SourceInfo info = makeSourceInfo(x);

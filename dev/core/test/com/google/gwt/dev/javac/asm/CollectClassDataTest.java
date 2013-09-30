@@ -17,10 +17,10 @@ package com.google.gwt.dev.javac.asm;
 
 import com.google.gwt.dev.javac.typemodel.test.PrimitiveValuesAnnotation;
 import com.google.gwt.dev.javac.typemodel.test.TestAnnotation;
-import com.google.gwt.dev.asm.AnnotationVisitor;
-import com.google.gwt.dev.asm.ClassReader;
-import com.google.gwt.dev.asm.Opcodes;
-import com.google.gwt.dev.asm.Type;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import com.google.gwt.dev.javac.asmbridge.EmptyVisitor;
 import com.google.gwt.dev.javac.asm.CollectAnnotationData.AnnotationData;
 import com.google.gwt.dev.javac.asm.CollectClassData.ClassType;

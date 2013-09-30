@@ -10,7 +10,8 @@ sourceSets {
 
 dependencies {
     compile localJar('protobuf/protobuf-2.2.0/protobuf-java-rebased-2.2.0.jar')
-    compile localJar('eclipse/org.eclipse.jdt.core_3.8.3.v20130121-145325.jar')
+//    compile localJar('eclipse/org.eclipse.jdt.core_3.8.3.v20130121-145325.jar')
+    compile localJar('eclipse/org.eclipse.jdt.core-3.9.0.v20130604-1421.jar')
     compile localJar('eclipse/jdtCompilerAdapter-3.8.3.v20130121-145325.jar')
     compile localJar('jscomp/r1649/compiler-rebased.jar')
     compile localJar('jetty/jetty-6.1.11.jar')

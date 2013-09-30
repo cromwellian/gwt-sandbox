@@ -19,16 +19,7 @@ import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.i18n.client.PluralRule.PluralForm;
 import com.google.gwt.i18n.shared.GwtLocale;
 
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * AbstractResource serves the same purpose as java
@@ -127,6 +118,11 @@ public abstract class AbstractResource {
     private Map<String, PluralForm[]> pluralForms = new HashMap<String, PluralForm[]>();
 
     private Set<AbstractResource> set = new HashSet<AbstractResource>();
+
+    @Override
+    public Spliterator<AbstractResource> spliterator() {
+          return Set.super.spliterator();
+    }
 
     @Override
     public boolean add(AbstractResource element) {

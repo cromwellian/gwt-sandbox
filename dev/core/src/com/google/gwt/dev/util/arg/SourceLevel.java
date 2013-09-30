@@ -25,7 +25,8 @@ package com.google.gwt.dev.util.arg;
 public enum SourceLevel {
   // Source levels must appear in ascending order in order.
   JAVA6("1.6", "6"),
-  JAVA7("1.7", "7");
+  JAVA7("1.7", "7"),
+  JAVA8("1.8", "8");
 
   /**
    * The default java sourceLevel.
