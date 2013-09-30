@@ -996,6 +996,16 @@ public class GwtAstBuilder {
           innerLambda.setEnclosingType((JDeclaredType) typeMap.get(x.binding.declaringClass));
           innerLambda.addImplements(funcType);
           innerLambda.setSuperClass(javaLangObject);
+          createSyntheticMethod(info, "$clinit", innerLambda, JPrimitiveType.VOID, false, true, true,
+                  AccessModifier.PRIVATE);
+
+          createSyntheticMethod(info, "$init", innerLambda, JPrimitiveType.VOID, false, false, true,
+                      AccessModifier.PRIVATE);
+
+          // Add a getClass() implementation for all non-Object classes.
+          createSyntheticMethod(info, "getClass", innerLambda, javaLangClass, false, false, false,
+                          AccessModifier.PUBLIC);
+
           JConstructor ctor = new JConstructor(info,
                   (JClassType) innerLambda);
           JParameter outerParam = new JParameter(info, "outer", innerLambda.getEnclosingType(),
@@ -1046,8 +1056,8 @@ public class GwtAstBuilder {
           ctor.setBody(ctorBody);
           innerLambda.addMethod(ctor);
 
-          JMethod lambdaMethod = createSyntheticMethodFromBinding(info, x.binding,
-                  paramNames);
+          JMethod lambdaMethod = curMethod.method;
+
           JExpression expr = (JExpression) pop();
           JMethodBody body = (JMethodBody) curMethod.method.getBody();
           body.getBlock().addStmt(expr.makeStatement());
@@ -1082,10 +1092,18 @@ public class GwtAstBuilder {
               } else {
                   samMethodBody.getBlock().addStmt(samCall.makeStatement());
               }
+              samMethod.setBody(samMethodBody);
               innerLambda.addMethod(samMethod);
               JNewInstance allocLambda = new JNewInstance(info, ctor, innerLambda);
               allocLambda.addArg(new JThisRef(info, (JClassType) outerField.getEnclosingType()));
+              for (SyntheticArgumentBinding sa : synthArgs) {
+                  allocLambda.addArg(makeLocalRef(info, sa.actualOuterLocalVariable, methodStack.peek()));
+              }
+              ctor.freezeParamTypes();
+              samMethod.freezeParamTypes();
               push(allocLambda);
+              popMethodInfo();
+              newTypes.add(innerLambda);
               break;
           }
       }
@@ -2345,14 +2363,18 @@ public class GwtAstBuilder {
       return new JFieldRef(info, makeThisRef(info), field, curClass.classType);
     }
 
-    private JExpression makeLocalRef(SourceInfo info, LocalVariableBinding b) {
-      JVariable variable = curMethod.locals.get(b);
+    private JExpression makeLocalRef(SourceInfo info, LocalVariableBinding b, MethodInfo cur) {
+      JVariable variable = cur.locals.get(b);
       assert variable != null;
       if (variable instanceof JLocal) {
         return new JLocalRef(info, (JLocal) variable);
       } else {
         return new JParameterRef(info, (JParameter) variable);
       }
+    }
+
+    private JExpression makeLocalRef(SourceInfo info, LocalVariableBinding b) {
+      return makeLocalRef(info, b, curMethod);
     }
 
     private JThisRef makeThisRef(SourceInfo info) {
