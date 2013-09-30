@@ -38,6 +38,7 @@ import com.google.gwt.dev.js.ast.JsNode;
 import com.google.gwt.dev.js.ast.JsParameter;
 import com.google.gwt.dev.util.StringInterner;
 
+import com.sun.swing.internal.plaf.synth.resources.synth;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
@@ -961,6 +962,15 @@ public class GwtAstBuilder {
           JMethodBody methodBody = new JMethodBody(info);
           lambdaMethod.setBody(methodBody);
           pushMethodInfo(new MethodInfo(lambdaMethod, methodBody, x.scope));
+          Iterator<JParameter> it = lambdaMethod.getParams().iterator();
+          if (synthArgs != null) {
+              for (SyntheticArgumentBinding sa : synthArgs) {
+                  curMethod.locals.put(sa.actualOuterLocalVariable, it.next());
+              }
+              for (Argument a : x.arguments) {
+                  curMethod.locals.put(a.binding, it.next());
+              }
+          }
           return true;
       }
 
@@ -987,7 +997,7 @@ public class GwtAstBuilder {
           innerLambda.addImplements(funcType);
           innerLambda.setSuperClass(javaLangObject);
           JConstructor ctor = new JConstructor(info,
-                  (JClassType) innerLambda.getEnclosingType());
+                  (JClassType) innerLambda);
           JParameter outerParam = new JParameter(info, "outer", innerLambda.getEnclosingType(),
                   true, false, ctor);
           ctor.addParam(outerParam);
@@ -1044,8 +1054,11 @@ public class GwtAstBuilder {
           lambdaMethod.setBody(body);
 
           for (JMethod m : funcType.getMethods()) {
+              if (m.getName().equals("$clinit")) {
+                  continue;
+              }
               JMethod samMethod = new JMethod(info, m.getName(),
-                      innerLambda.getEnclosingType(), m.getOriginalReturnType(),
+                      innerLambda, m.getOriginalReturnType(),
                       false, false, true, m.getAccess());
               for (JParameter origParam : m.getParams()) {
                   samMethod.addParam(new JParameter(origParam.getSourceInfo(),
@@ -1071,6 +1084,7 @@ public class GwtAstBuilder {
               }
               innerLambda.addMethod(samMethod);
               JNewInstance allocLambda = new JNewInstance(info, ctor, innerLambda);
+              allocLambda.addArg(new JThisRef(info, (JClassType) outerField.getEnclosingType()));
               push(allocLambda);
               break;
           }
