@@ -333,6 +333,9 @@ public class JProgram extends JNode {
   }
 
   public void addType(JDeclaredType type) {
+    if (getFromTypeMap(type.getName()) != null) {
+        return;
+    }
     allTypes.add(type);
     String name = type.getName();
     putIntoTypeMap(name, type);

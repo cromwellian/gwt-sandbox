@@ -42,24 +42,7 @@ import com.sun.swing.internal.plaf.synth.resources.synth;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
-import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.Binding;
-import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
-import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
-import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
-import org.eclipse.jdt.internal.compiler.lookup.LocalTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
-import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
-import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
-import org.eclipse.jdt.internal.compiler.lookup.NestedTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
-import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.SyntheticArgumentBinding;
-import org.eclipse.jdt.internal.compiler.lookup.SyntheticMethodBinding;
-import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
-import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
+import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.jdt.internal.compiler.util.Util;
 
 import java.lang.reflect.Field;
@@ -989,8 +972,11 @@ public class GwtAstBuilder {
            * }
            */
 
-          SourceTypeBinding binding = (SourceTypeBinding) x.expectedType();
-          JMethod interfaceMethod = typeMap.get(binding.methods()[0]);
+          TypeBinding binding = x.expectedType();
+          MethodBinding samBinding = binding instanceof SourceTypeBinding ?
+                  ((SourceTypeBinding) binding).getSingleAbstractMethod(blockScope) :
+                  ((BinaryTypeBinding) binding).getSingleAbstractMethod(blockScope);
+          JMethod interfaceMethod = typeMap.get(samBinding);
           JInterfaceType funcType = (JInterfaceType) interfaceMethod.getEnclosingType();
           SourceInfo info = makeSourceInfo(x);
           JClassType innerLambda = new JClassType(info,
@@ -1018,6 +1004,14 @@ public class GwtAstBuilder {
           innerLambda.addField(outerField);
 
           JMethodBody ctorBody = new JMethodBody(info);
+
+          JThisRef ojThis = new JThisRef(info, innerLambda);
+          JFieldRef ojFieldRef = new JFieldRef(info, ojThis, outerField, innerLambda);
+          JParameterRef ojParamRef = new JParameterRef(info, outerParam);
+          ctorBody.getBlock().addStmt(
+                  new JBinaryOperation(info, ojFieldRef.getType(),
+                          JBinaryOperator.ASG,
+                          ojFieldRef, ojParamRef).makeStatement());
 
           List<JField> locals = new ArrayList<JField>();
           SyntheticArgumentBinding[] synthArgs = null;
@@ -1069,11 +1063,15 @@ public class GwtAstBuilder {
 
 
           JMethod samMethod = new JMethod(info, interfaceMethod.getName(),
-                  innerLambda, interfaceMethod.getOriginalReturnType(),
+                  innerLambda, interfaceMethod.getType(),
                   false, false, true, interfaceMethod.getAccess());
           for (JParameter origParam : interfaceMethod.getParams()) {
+              JType origType = origParam.getType();
+              if (origType instanceof JClassType) {
+//                  origType = ((JClassType) origType).toExternal();
+              }
               samMethod.addParam(new JParameter(origParam.getSourceInfo(),
-                      origParam.getName(),origParam.getType(),
+                      origParam.getName(), origType,
                       origParam.isFinal(), origParam.isThis(),
                       samMethod));
           }
@@ -1088,7 +1086,7 @@ public class GwtAstBuilder {
           for (JParameter param : samMethod.getParams()) {
               samCall.addArg(new JParameterRef(info, param));
           }
-          if (samMethod.getOriginalReturnType() != JPrimitiveType.VOID) {
+          if (samMethod.getType() != JPrimitiveType.VOID) {
               samMethodBody.getBlock().addStmt(new JReturnStatement(info, samCall));
           } else {
               samMethodBody.getBlock().addStmt(samCall.makeStatement());
@@ -1102,6 +1100,7 @@ public class GwtAstBuilder {
           }
           ctor.freezeParamTypes();
           samMethod.freezeParamTypes();
+
           push(allocLambda);
           popMethodInfo();
           newTypes.add(innerLambda);

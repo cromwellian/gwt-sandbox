@@ -1155,7 +1155,11 @@ public class UnifyAst {
       }
       assert !type.isExternal();
     }
-
+    // should never happen, but does for concrete lambda overrides!
+    // TODO(cromwellian) find out why
+    if (program.getFromTypeMap(type.getName()) != type) {
+        return program.getFromTypeMap(type.getName());
+    }
     return type;
   }
 

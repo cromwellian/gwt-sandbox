@@ -17,6 +17,7 @@ package com.google.gwt.sample.hello.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -27,19 +28,29 @@ import static com.google.gwt.user.client.Window.alert;
  * HelloWorld application.
  */
 public class Hello implements EntryPoint {
-  float field = 22;
+  double field = Math.random();
   static double sfield = 80;
+//  ClickHandler e;
   public void onModuleLoad() {
+
     int  localx = 42;
+
+//    Button b2 = new Button("Click", new ClickHandler() {
+//        @Override
+//        public void onClick(ClickEvent event) {
+//            Window.alert("old style");
+//        }
+//    });
     Button b = new Button("Click me", (ClickEvent event) -> {
-        int innerLocal = 10;
-        Runnable r = () -> {
-          alert("hello " + event + localx + field);
-          alert("world " + event + localx + sfield + innerLocal);
-        };
-        r.run();
+//        int innerLocal = 10;
+//        Runnable r = () -> {
+          alert("x2hello " + event + localx + field);
+//          alert("world " + event + localx + sfield + innerLocal);
+//        };
+//        r.run();
     });
 
+//    RootPanel.get().add(b2);
     RootPanel.get().add(b);
   }
 }
