@@ -31,6 +31,8 @@ public class Hello implements EntryPoint {
   double field = Math.random();
   static double sfield = 80;
 //  ClickHandler e;
+
+
   public void onModuleLoad() {
 
     int  localx = 42;
@@ -50,7 +52,12 @@ public class Hello implements EntryPoint {
 //        r.run();
     });
 
-//    RootPanel.get().add(b2);
+    Button b2 = new Button("Click2", this::someMethod);
+    RootPanel.get().add(b2);
     RootPanel.get().add(b);
   }
+
+   public void someMethod(ClickEvent event) {
+       alert("goodbye " + event + field);
+   }
 }
