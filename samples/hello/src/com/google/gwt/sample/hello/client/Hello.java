@@ -22,42 +22,58 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.RootPanel;
 
+import java.util.Arrays;
+
 import static com.google.gwt.user.client.Window.alert;
 
 /**
  * HelloWorld application.
  */
 public class Hello implements EntryPoint {
-  double field = Math.random();
-  static double sfield = 80;
+    double field = Math.random();
+    static double sfield = 80;
 //  ClickHandler e;
+    interface Provider<T> {
+        T get();
+    }
 
 
-  public void onModuleLoad() {
+    public void onModuleLoad() {
 
-    int  localx = 42;
+        int localx = 42;
 
-//    Button b2 = new Button("Click", new ClickHandler() {
-//        @Override
-//        public void onClick(ClickEvent event) {
-//            Window.alert("old style");
-//        }
-//    });
-    Button b = new Button("Click me", (ClickEvent event) -> {
-//        int innerLocal = 10;
-//        Runnable r = () -> {
-          alert("x2hello " + event + localx + field);
-//          alert("world " + event + localx + sfield + innerLocal);
-//        };
-//        r.run();
+    Button b2 = new Button("Click", new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+            Window.alert("old style");
+        }
     });
+        Button b = new Button("Click me", (ClickEvent event) -> {
+        int innerLocal = 10;
+        Runnable r = () -> {
+            alert("x2hello " + event + localx + field);
+          alert("world " + event + localx + sfield + innerLocal);
+        };
+        r.run();
+        });
 
-    Button b2 = new Button("Click2", this::someMethod);
-    RootPanel.get().add(b2);
-    RootPanel.get().add(b);
-  }
+        Button b3 = new Button("Click3", Hello::someMethod);
+        RootPanel.get().add(b3);
+        RootPanel.get().add(b2);
+        RootPanel.get().add(b);
 
-   public void someMethod(ClickEvent event) {
-       alert("goodbye " + event + field);
-   }
+        String[] stuff = {"apple", "oranges", "grapes"};
+        Arrays.sort(stuff, String::compareToIgnoreCase);
+        alert(stuff.toString());
+        Hello x = make(Hello::new);
+        alert(""+x);
+    }
+
+    public <T> T make(Provider<T> provider) {
+        return provider.get();
+    }
+
+    public static void someMethod(ClickEvent event) {
+        alert("goodbye2 " + event);
+    }
 }

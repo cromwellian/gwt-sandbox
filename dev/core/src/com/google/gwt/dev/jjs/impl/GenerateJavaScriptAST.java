@@ -2676,7 +2676,7 @@ public class GenerateJavaScriptAST {
     }
   }
 
-  String getNameString(HasName hasName) {
+  public static String getNameString(HasName hasName) {
     String s = hasName.getName().replaceAll("_", "_1").replace('.', '_');
     return s;
   }
@@ -2723,7 +2723,7 @@ public class GenerateJavaScriptAST {
     return sb.toString();
   }
 
-  String mangleNameForPrivatePoly(JMethod x) {
+  public static String mangleNameForPrivatePoly(JMethod x) {
     assert x.isPrivate() && !x.isStatic();
     StringBuffer sb = new StringBuffer();
     /*

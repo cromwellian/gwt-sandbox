@@ -1330,7 +1330,135 @@ public class GwtAstBuilder {
       }
     }
 
-    @Override
+      @Override
+      public void endVisit(ReferenceExpression x, BlockScope blockScope) {
+          /**
+           * converts an expression like foo(qualifier::someMethod) into
+           *
+           * class Enclosing {
+           *
+           *   T someMethod(locals, args) {...lambda expr }
+           *
+           *   class lambda$someMethodType implements I {
+           *       ctor(qualifier) { ... }
+           *       R <SAM lambdaMethod>(args) { return outer.someMethod(args); }
+           *   }
+           * }
+           */
+
+          TypeBinding binding = x.expectedType();
+          MethodBinding samBinding = binding instanceof SourceTypeBinding ?
+                  binding.getSingleAbstractMethod(blockScope) :
+                  binding.getSingleAbstractMethod(blockScope);
+          JMethod interfaceMethod = typeMap.get(samBinding);
+          JInterfaceType funcType = (JInterfaceType) interfaceMethod.getEnclosingType();
+          SourceInfo info = makeSourceInfo(x);
+          JMethod referredMethod = typeMap.get(x.binding);
+
+          String lambdaName = GenerateJavaScriptAST.mangleNameForPrivatePoly(referredMethod);
+
+          JClassType innerLambda = new JClassType(info,
+                  "lambda$" + lambdaName + "$Type" ,false, true);
+          innerLambda.setEnclosingType((JDeclaredType) typeMap.get(x.binding.declaringClass));
+          innerLambda.addImplements(funcType);
+          innerLambda.setSuperClass(javaLangObject);
+          createSyntheticMethod(info, "$clinit", innerLambda, JPrimitiveType.VOID, false, true, true,
+                  AccessModifier.PRIVATE);
+
+          createSyntheticMethod(info, "$init", innerLambda, JPrimitiveType.VOID, false, false, true,
+                  AccessModifier.PRIVATE);
+
+          // Add a getClass() implementation for all non-Object classes.
+          createSyntheticMethod(info, "getClass", innerLambda, javaLangClass, false, false, false,
+                  AccessModifier.PUBLIC);
+
+          JConstructor ctor = new JConstructor(info,
+                  innerLambda);
+
+          boolean haveReceiver = false;
+          try {
+              Field f = ReferenceExpression.class.getDeclaredField("haveReceiver");
+              f.setAccessible(true);
+              haveReceiver= (Boolean) f.get(x);
+
+          } catch (Exception e) {
+          }
+
+          JParameter outerParam;
+          JMethodBody ctorBody = new JMethodBody(info);
+          JThisRef ojThis = new JThisRef(info, innerLambda);
+          JExpression instance = null;
+
+          if (haveReceiver) {
+              outerParam = new JParameter(info, "outer", innerLambda.getEnclosingType(),
+                      true, false, ctor);
+              ctor.addParam(outerParam);
+              JField outerField = new JField(info, "$$outer", innerLambda,
+                      innerLambda.getEnclosingType(), false, Disposition.NONE);
+              innerLambda.addField(outerField);
+              JFieldRef ojFieldRef = new JFieldRef(info, ojThis, outerField, innerLambda);
+              JParameterRef ojParamRef = new JParameterRef(info, outerParam);
+              ctorBody.getBlock().addStmt(
+                      new JBinaryOperation(info, ojFieldRef.getType(),
+                              JBinaryOperator.ASG,
+                              ojFieldRef, ojParamRef).makeStatement());
+              instance = new JFieldRef(info,
+                      new JThisRef(info, innerLambda), outerField, innerLambda);
+          }
+          ctor.setBody(ctorBody);
+          innerLambda.addMethod(ctor);
+
+          JMethod samMethod = new JMethod(info, interfaceMethod.getName(),
+                  innerLambda, interfaceMethod.getType(),
+                  false, false, true, interfaceMethod.getAccess());
+          for (JParameter origParam : interfaceMethod.getParams()) {
+              JType origType = origParam.getType();
+              samMethod.addParam(new JParameter(origParam.getSourceInfo(),
+                      origParam.getName(), origType,
+                      origParam.isFinal(), origParam.isThis(),
+                      samMethod));
+          }
+          JMethodBody samMethodBody = new JMethodBody(info);
+
+          Iterator<JParameter> paramIt = samMethod.getParams().iterator();
+
+          if (!haveReceiver && !referredMethod.isStatic() && instance == null &&
+                  samMethod.getParams().size() == referredMethod.getParams().size() + 1) {
+             instance = new JParameterRef(info, paramIt.next());
+          }
+          JMethodCall samCall = null;
+
+          if (referredMethod.isConstructor()) {
+              samCall = new JNewInstance(info, (JConstructor) referredMethod, referredMethod.getEnclosingType());
+          } else {
+              samCall = new JMethodCall(info, instance,
+                      referredMethod);
+          }
+
+          while(paramIt.hasNext()) {
+              samCall.addArg(new JParameterRef(info, paramIt.next()));
+          }
+          if (samMethod.getType() != JPrimitiveType.VOID) {
+              samMethodBody.getBlock().addStmt(new JReturnStatement(info, samCall));
+          } else {
+              samMethodBody.getBlock().addStmt(samCall.makeStatement());
+          }
+          samMethod.setBody(samMethodBody);
+          innerLambda.addMethod(samMethod);
+          JNewInstance allocLambda = new JNewInstance(info, ctor, innerLambda);
+          JExpression qualifier = (JExpression) pop();
+          if (haveReceiver) {
+            // pop qualifier from stack
+            allocLambda.addArg(qualifier);
+          }
+          ctor.freezeParamTypes();
+          samMethod.freezeParamTypes();
+
+          push(allocLambda);
+          newTypes.add(innerLambda);
+      }
+
+      @Override
     public void endVisit(ReturnStatement x, BlockScope scope) {
       try {
         SourceInfo info = makeSourceInfo(x);
