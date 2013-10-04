@@ -514,6 +514,8 @@ public class JdtCompiler {
     };
 
     long jdtSourceLevel = jdtLevelByGwtLevel.get(SourceLevel.DEFAULT_SOURCE_LEVEL);
+    options.ignoreMethodBodies = false;
+    options.produceMethodParameters = true;
 
     options.originalSourceLevel = jdtSourceLevel;
     options.complianceLevel = jdtSourceLevel;

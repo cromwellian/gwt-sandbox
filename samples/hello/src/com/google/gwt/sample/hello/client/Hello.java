@@ -32,10 +32,6 @@ import static com.google.gwt.user.client.Window.alert;
 public class Hello implements EntryPoint {
     double field = Math.random();
     static double sfield = 80;
-//  ClickHandler e;
-    interface Provider<T> {
-        T get();
-    }
 
 
     public void onModuleLoad() {
@@ -70,6 +66,7 @@ public class Hello implements EntryPoint {
     }
 
     public <T> T make(Provider<T> provider) {
+        provider.name69();
         return provider.get();
     }
 
