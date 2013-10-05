@@ -61,47 +61,11 @@ import com.google.gwt.dev.jjs.ast.JProgram;
 import com.google.gwt.dev.jjs.ast.JReboundEntryPoint;
 import com.google.gwt.dev.jjs.ast.JStatement;
 import com.google.gwt.dev.jjs.ast.JVisitor;
-import com.google.gwt.dev.jjs.impl.ArrayNormalizer;
-import com.google.gwt.dev.jjs.impl.AssertionNormalizer;
-import com.google.gwt.dev.jjs.impl.AssertionRemover;
-import com.google.gwt.dev.jjs.impl.AstDumper;
-import com.google.gwt.dev.jjs.impl.CastNormalizer;
-import com.google.gwt.dev.jjs.impl.CatchBlockNormalizer;
+import com.google.gwt.dev.jjs.impl.*;
 import com.google.gwt.dev.jjs.impl.codesplitter.CodeSplitter;
 import com.google.gwt.dev.jjs.impl.codesplitter.MultipleDependencyGraphRecorder;
-import com.google.gwt.dev.jjs.impl.ControlFlowAnalyzer;
-import com.google.gwt.dev.jjs.impl.DeadCodeElimination;
-import com.google.gwt.dev.jjs.impl.EnumOrdinalizer;
-import com.google.gwt.dev.jjs.impl.EqualityNormalizer;
-import com.google.gwt.dev.jjs.impl.Finalizer;
-import com.google.gwt.dev.jjs.impl.FixAssignmentsToUnboxOrCast;
-import com.google.gwt.dev.jjs.impl.GenerateJavaScriptAST;
-import com.google.gwt.dev.jjs.impl.HandleCrossFragmentReferences;
-import com.google.gwt.dev.jjs.impl.ImplementClassLiteralsAsFields;
-import com.google.gwt.dev.jjs.impl.JavaToJavaScriptMap;
-import com.google.gwt.dev.jjs.impl.JsAbstractTextTransformer;
-import com.google.gwt.dev.jjs.impl.JsFunctionClusterer;
-import com.google.gwt.dev.jjs.impl.JsIEBlockTextTransformer;
-import com.google.gwt.dev.jjs.impl.JsoDevirtualizer;
-import com.google.gwt.dev.jjs.impl.LongCastNormalizer;
-import com.google.gwt.dev.jjs.impl.LongEmulationNormalizer;
-import com.google.gwt.dev.jjs.impl.MakeCallsStatic;
-import com.google.gwt.dev.jjs.impl.MethodCallTightener;
-import com.google.gwt.dev.jjs.impl.MethodInliner;
-import com.google.gwt.dev.jjs.impl.OptimizerStats;
-import com.google.gwt.dev.jjs.impl.PostOptimizationCompoundAssignmentNormalizer;
-import com.google.gwt.dev.jjs.impl.Pruner;
-import com.google.gwt.dev.jjs.impl.RecordRebinds;
-import com.google.gwt.dev.jjs.impl.RemoveEmptySuperCalls;
-import com.google.gwt.dev.jjs.impl.ReplaceGetClassOverrides;
 import com.google.gwt.dev.jjs.impl.codesplitter.CodeSplitters;
 import com.google.gwt.dev.jjs.impl.codesplitter.ReplaceRunAsyncs;
-import com.google.gwt.dev.jjs.impl.ResolveRebinds;
-import com.google.gwt.dev.jjs.impl.SameParameterValueOptimizer;
-import com.google.gwt.dev.jjs.impl.SourceInfoCorrelator;
-import com.google.gwt.dev.jjs.impl.TypeTightener;
-import com.google.gwt.dev.jjs.impl.UnifyAst;
-import com.google.gwt.dev.jjs.impl.VerifySymbolMap;
 import com.google.gwt.dev.jjs.impl.gflow.DataflowOptimizer;
 import com.google.gwt.dev.js.BaselineCoverageGatherer;
 import com.google.gwt.dev.js.ClosureJsRunner;
@@ -723,6 +687,7 @@ public class JavaToJavaScriptCompiler {
       }
 
       ImplementClassLiteralsAsFields.exec(jprogram);
+      MixinDefenderMethods.exec(jprogram);
 
       /*
        * 4) Possibly optimize some.

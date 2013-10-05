@@ -37,7 +37,12 @@ import java.util.Set;
  */
 public class JTypeOracle implements Serializable {
 
-  /**
+
+    public Set<JClassType> getImplementors(JInterfaceType type) {
+        return isImplementedMap.get(type);
+    }
+
+    /**
    * Checks a clinit method to find out a few things.
    * 
    * <ol>

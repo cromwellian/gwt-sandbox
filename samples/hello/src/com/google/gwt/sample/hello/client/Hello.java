@@ -29,7 +29,7 @@ import static com.google.gwt.user.client.Window.alert;
 /**
  * HelloWorld application.
  */
-public class Hello implements EntryPoint {
+public class Hello implements EntryPoint, Provider<Object> {
     double field = Math.random();
     static double sfield = 80;
 
@@ -63,6 +63,7 @@ public class Hello implements EntryPoint {
         alert(stuff.toString());
         Hello x = make(Hello::new);
         alert(""+x);
+        alert("" + this.name69());
     }
 
     public <T> T make(Provider<T> provider) {
@@ -72,5 +73,10 @@ public class Hello implements EntryPoint {
 
     public static void someMethod(ClickEvent event) {
         alert("goodbye2 " + event);
+    }
+
+    @Override
+    public Object get() {
+        return null;
     }
 }

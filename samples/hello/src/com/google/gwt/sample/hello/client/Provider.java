@@ -7,7 +7,9 @@ import static com.google.gwt.user.client.Window.alert;
  */ //  ClickHandler e;
     public interface Provider<T> {
         T get();
-        default void name69() {
-           System.out.println("Hello");
+
+        default Provider<T> name69() {
+
+           return this;
         }
     }
