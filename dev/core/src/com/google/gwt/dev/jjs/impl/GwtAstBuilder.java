@@ -1087,7 +1087,8 @@ public class GwtAstBuilder {
           JMethodBody body = (JMethodBody) curMethod.method.getBody();
           // and copy those nodes into the body of our synthetic method
           JStatement lambdaStatement = node instanceof JExpression ?
-                  ((JExpression) node).makeStatement() : (JStatement) node;
+                  (((JExpression) node).getType() == JPrimitiveType.VOID ? ((JExpression) node).makeStatement() :
+                  new JReturnStatement(node.getSourceInfo(), (JExpression) node)) : (JStatement) node;
           body.getBlock().addStmt(lambdaStatement);
           lambdaMethod.setBody(body);
 
@@ -1502,8 +1503,18 @@ public class GwtAstBuilder {
           while(paramIt.hasNext()) {
               samCall.addArg(new JParameterRef(info, paramIt.next()));
           }
+          int implicitConversionBefore = x.implicitConversion;
           if (samMethod.getType() != JPrimitiveType.VOID) {
-              samMethodBody.getBlock().addStmt(new JReturnStatement(info, samCall));
+
+              if (x.binding.returnType.isBaseType() && !(samMethod.getType() instanceof JPrimitiveType)) {
+                  x.implicitConversion = (x.binding.returnType.id & TypeIds.IMPLICIT_CONVERSION_MASK) << 4;
+                  x.implicitConversion = x.implicitConversion | TypeIds.BOXING;
+              }
+              if (!x.binding.returnType.isBaseType() && samMethod.getType() instanceof JPrimitiveType) {
+                  x.implicitConversion = x.binding.returnType.id & TypeIds.COMPILE_TYPE_MASK;
+                  x.implicitConversion = x.implicitConversion | TypeIds.UNBOXING;
+              }
+              samMethodBody.getBlock().addStmt(new JReturnStatement(info, simplify(samCall, x)));
           } else {
               samMethodBody.getBlock().addStmt(samCall.makeStatement());
           }
@@ -1519,6 +1530,7 @@ public class GwtAstBuilder {
           ctor.freezeParamTypes();
           samMethod.freezeParamTypes();
 
+          x.implicitConversion = implicitConversionBefore;
           push(allocLambda);
           newTypes.add(innerLambdaClass);
       }

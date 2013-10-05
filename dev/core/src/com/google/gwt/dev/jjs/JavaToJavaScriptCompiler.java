@@ -664,7 +664,9 @@ public class JavaToJavaScriptCompiler {
         }
       }
 
-      // (3) Perform Java AST normalizations.
+      MixinDefenderMethods.exec(jprogram);
+
+        // (3) Perform Java AST normalizations.
       FixAssignmentsToUnboxOrCast.exec(jprogram);
 
       /*
@@ -687,7 +689,6 @@ public class JavaToJavaScriptCompiler {
       }
 
       ImplementClassLiteralsAsFields.exec(jprogram);
-      MixinDefenderMethods.exec(jprogram);
 
       /*
        * 4) Possibly optimize some.
