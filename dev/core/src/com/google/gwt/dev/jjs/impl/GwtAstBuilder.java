@@ -1016,7 +1016,7 @@ public class GwtAstBuilder {
 
           // Create an inner class to implement the interface and SAM method.
           // class lambda$0$Type implements T {}
-          JClassType innerLambdaClass = createInnerClass(new String(x.binding.selector), x, funcType, info);
+          JClassType innerLambdaClass = createInnerClass(new String(x.binding.declaringClass.sourceName) + "$" + new String(x.binding.selector), x, funcType, info);
 
           // Create a constructor to accept all "captured" locals
           // CTor(OuterClassRef ref, capture1, capture2) { }

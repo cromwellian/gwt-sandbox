@@ -32,7 +32,9 @@ public class Hello implements EntryPoint {
 
     public void onModuleLoad() {
       List<Double> strings = make(10, Math::random);
-      double specialSum = filterSum(strings, x -> x > 0.5);
+      Predicate<Double> gthalf = x -> x > 0.5;
+
+      double specialSum = filterSum(strings, gthalf.and(x -> x < 0.8));
       alert("" + specialSum);
     }
 

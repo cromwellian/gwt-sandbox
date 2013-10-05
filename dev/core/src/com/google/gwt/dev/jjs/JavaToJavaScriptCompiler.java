@@ -650,6 +650,8 @@ public class JavaToJavaScriptCompiler {
 
       // Compute all super type/sub type info
       jprogram.typeOracle.computeBeforeAST();
+      MixinDefenderMethods.exec(jprogram);
+      jprogram.typeOracle.computeBeforeAST();
 
       Memory.maybeDumpMemory("AstOnly");
       AstDumper.maybeDumpAST(jprogram);
@@ -664,9 +666,7 @@ public class JavaToJavaScriptCompiler {
         }
       }
 
-      MixinDefenderMethods.exec(jprogram);
-
-        // (3) Perform Java AST normalizations.
+      // (3) Perform Java AST normalizations.
       FixAssignmentsToUnboxOrCast.exec(jprogram);
 
       /*

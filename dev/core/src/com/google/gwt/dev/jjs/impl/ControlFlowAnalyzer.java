@@ -565,6 +565,9 @@ public class ControlFlowAnalyzer {
 
     private boolean rescue(JMethod method) {
       if (method != null) {
+        if (method.getName().equals("$and")) {
+            boolean xx = true;
+        }
         if (!liveFieldsAndMethods.contains(method)) {
           liveFieldsAndMethods.add(method);
           membersToRescueIfTypeIsInstantiated.remove(method);

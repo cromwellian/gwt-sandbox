@@ -360,6 +360,9 @@ public class GenerateJavaScriptAST {
     public boolean visit(JMethod x, Context ctx) {
       // my polymorphic name
       String name = x.getName();
+      if (name.contains("$and")) {
+          boolean xx = true;
+      }
       if (x.needsVtable()) {
         if (polymorphicNames.get(x) == null) {
           JsName polyName;
@@ -1053,6 +1056,17 @@ public class GenerateJavaScriptAST {
         JsFunction clinitFunc = jsFuncs.get(0);
         handleClinit(clinitFunc, null);
         globalStmts.add(clinitFunc.makeStmt());
+      } else {
+        jsFuncs.set(0, null);
+      }
+
+      // declare all static methods (Java8) into the global scope
+      for (int i = 0; i < jsFuncs.size(); ++i) {
+          JsFunction func = jsFuncs.get(i);
+         // don't add polymorphic JsFuncs, inline decl into vtable assignment
+         if (func != null && !polymorphicJsFunctions.contains(func)) {
+             globalStmts.add(func.makeStmt());
+         }
       }
 
       // setup fields
