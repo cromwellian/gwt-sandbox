@@ -243,9 +243,6 @@ public class UnifyAst {
     public void endVisit(JMethodCall x, Context ctx) {
       // Already resolved during visit().
       JMethod target = x.getTarget();
-      if (x.getTarget().getEnclosingType().getName().contains("Predicate")) {
-          boolean xx = true;
-      }
       if (target.isExternal()) {
         assert errorsFound;
         return;
@@ -833,9 +830,6 @@ public class UnifyAst {
   }
 
   private void flowInto(JMethod method) {
-    if (method.getName().equals("and")) {
-        boolean xx = true;
-    }
     if (method.isExternal()) {
       assert errorsFound;
       return;
@@ -894,9 +888,6 @@ public class UnifyAst {
     if (type.isExternal()) {
       assert errorsFound;
       return;
-    }
-    if (type.getName().contains("lambda")) {
-        boolean xx = true;
     }
     if (!instantiatedTypes.contains(type)) {
       instantiatedTypes.add(type);

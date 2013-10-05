@@ -2038,9 +2038,6 @@ public class GwtAstBuilder {
       try {
         JMethod method = typeMap.get(x.binding);
         assert !method.isExternal();
-          if (method.getName().equals("name69")) {
-              boolean xx = true;
-          }
         JMethodBody body = null;
         if (!method.isNative()) {
           body = new JMethodBody(method.getSourceInfo());
@@ -3626,9 +3623,6 @@ public class GwtAstBuilder {
       }
       name = intern(name);
       JDeclaredType type;
-        if (name.contains("Defender") || name.contains("Foo")) {
-            boolean xx = true;
-        }
       if (binding.isClass()) {
         type = new JClassType(info, name, binding.isAbstract(), binding.isFinal());
       } else if (binding.isInterface() || binding.isAnnotationType()) {

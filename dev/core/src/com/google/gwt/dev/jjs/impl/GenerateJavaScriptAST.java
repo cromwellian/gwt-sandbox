@@ -360,9 +360,6 @@ public class GenerateJavaScriptAST {
     public boolean visit(JMethod x, Context ctx) {
       // my polymorphic name
       String name = x.getName();
-      if (name.contains("$and")) {
-          boolean xx = true;
-      }
       if (x.needsVtable()) {
         if (polymorphicNames.get(x) == null) {
           JsName polyName;

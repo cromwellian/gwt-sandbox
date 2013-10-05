@@ -100,9 +100,6 @@ public class ReferenceMapper {
       assert !sourceMethod.isExternal();
       return sourceMethod;
     }
-      if (key.contains(".onClick")) {
-          boolean xx = true;
-      }
     JMethod method = methods.get(key);
     if (method == null) {
       if (binding.isConstructor()) {
@@ -121,9 +118,6 @@ public class ReferenceMapper {
     String key = signature(binding);
     JReferenceType sourceType = sourceTypes.get(key);
 
-    if (key.endsWith("/ClickEvent")) {
-        boolean xx = true;
-    }
     if (sourceType != null) {
       assert !sourceType.isExternal();
       return sourceType;
@@ -142,9 +136,6 @@ public class ReferenceMapper {
       if (arrayType.isExternal()) {
         types.put(key, arrayType);
       } else {
-        if (key.endsWith("/ClickEvent")) {
-            boolean xx = true;
-        }
         sourceTypes.put(key, arrayType);
       }
       return arrayType;
@@ -184,9 +175,6 @@ public class ReferenceMapper {
       clinit.setSynthetic();
       declType.addMethod(clinit);
       declType.setExternal(true);
-      if (key.endsWith("/ClickEvent")) {
-          boolean xx = true;
-      }
       types.put(key, declType);
       return declType;
     }
@@ -208,9 +196,6 @@ public class ReferenceMapper {
 
   public void setSourceType(SourceTypeBinding binding, JDeclaredType type) {
     String key = signature(binding);
-    if (key.endsWith("/ClickEvent")) {
-        boolean xx = true;
-    }
     if (!sourceTypes.containsKey(key)) {
         sourceTypes.put(key, type);
     }

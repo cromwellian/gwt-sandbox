@@ -254,9 +254,6 @@ public class JdtCompiler {
       // would be ignored.
       boolean saveDiet = this.diet;
       this.diet = false;
-      if (sourceUnit.toString().endsWith("/Provider.java")) {
-          boolean xx = true;
-      }
       CompilationUnitDeclaration decl = super.parse(sourceUnit, compilationResult);
       this.diet = saveDiet;
       if (removeGwtIncompatible) {
