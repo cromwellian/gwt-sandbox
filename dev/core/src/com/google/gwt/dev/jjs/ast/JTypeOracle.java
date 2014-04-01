@@ -349,6 +349,7 @@ public class JTypeOracle implements Serializable {
    * prototype.
    */
   public boolean canCrossCastLikeJso(JType type) {
+    JInterfaceType intf = getNearestJsInterface(type, false);
     return canBeJavaScriptObject(type) ||
         (isOrExtendsJsInterface(type, false) && !isOrExtendsJsInterface(type, true));
   }
@@ -664,6 +665,9 @@ public class JTypeOracle implements Serializable {
    */
   public JInterfaceType getNearestJsInterface(JType type,
       boolean mustHavePrototype) {
+    if (type instanceof JNonNullType) {
+      type = ((JNonNullType) type).getUnderlyingType();
+    }
     if (type instanceof JInterfaceType) {
       JInterfaceType intf = (JInterfaceType) type;
       if (isJsInterface(type)) {

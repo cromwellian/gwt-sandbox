@@ -43,7 +43,7 @@ public class SingleJsoImplTest extends GWTTestCase {
     /*
      * NB: Picking a mix of double and int because doubles have size 2 on the
      * stack, so this ensures that we're handling that case correctly.
-     */
+     */l
     double add(double a, int b);
 
     /*

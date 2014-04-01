@@ -351,6 +351,9 @@ public class Pruner {
 
     @Override
     public boolean visit(JClassType type, Context ctx) {
+      if (!referencedTypes.contains(type)) {
+        System.err.println("ReferencedTypes doesn't contain " + type);
+      }
       assert (referencedTypes.contains(type));
       for (int i = 0; i < type.getFields().size(); ++i) {
         JField field = type.getFields().get(i);

@@ -68,16 +68,23 @@ public class PrunerTest extends OptimizerTestBase {
     addSnippetClassDecl("interface Callback { void go(); }");
     addSnippetImport("com.google.gwt.core.client.js.JsInterface");
     addSnippetImport("com.google.gwt.core.client.js.JsExport");
+    addSnippetImport("com.google.gwt.core.client.js.impl"
+        + ".PrototypeOfJsInterface");
+    addSnippetClassDecl("interface Callback { void go(); }");
+    addSnippetImport("com.google.gwt.core.client.js.JsInterface");
+    addSnippetImport("com.google.gwt.core.client.js.JsExport");
+
 
     addSnippetClassDecl("@JsInterface interface Js { void doIt(Callback cb); }");
     addSnippetClassDecl("@JsInterface(prototype=\"Foo\") interface JsProto { " +
-        "static class Prototype implements JsProto {" +
+        "@PrototypeOfJsInterface static class Prototype implements JsProto {" +
         "public Prototype(int arg) {}" +
         "public void doIt(Callback cb) {}" +
         "}" +
         "void doIt(Callback cb); " +
         "}");
-    addSnippetClassDecl("static class JsProtoImpl extends JsProto.Prototype {" +
+    addSnippetClassDecl("static class JsProtoImpl "
+        + "extends JsProto.Prototype {" +
         "public JsProtoImpl() { super(10); }" +
         "public void doIt(Callback cb) { super.doIt(cb); }" +
         "}");

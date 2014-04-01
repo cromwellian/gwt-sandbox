@@ -24,7 +24,8 @@ package com.google.gwt.junit;
  * <li>{@link HtmlUnitBug}: Gwt tests that are failing due to a bug in HtmlUnit.
  * Ideally, these must be accompanied by a bug report on the HtmlUnit issue
  * tracker.
- * <li>{@link HtmlUnitLayout}: Gwt tests that test layout. HtmlUnit does not use
+ * <li>{@link HtmlUnitLayout}: Gwt tests that test layout. HtmlUnit Ndoes not
+ * use
  * a layout engine, though some simple layout tests do pass with HtmlUnit.
  * <li>{@link HtmlUnitUnknown}: Gwt tests whose failures have not been
  * investigated yet.

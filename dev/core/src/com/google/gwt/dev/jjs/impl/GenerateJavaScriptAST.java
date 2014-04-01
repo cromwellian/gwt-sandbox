@@ -502,7 +502,7 @@ public class GenerateJavaScriptAST {
       recordSymbol(x, jsName);
 
       // My class scope
-      if (x.getSuperClass() == null) {
+      if (x.getSuperClass() == null || x.getSuperClass().isJsPrototypeStub()) {
         myScope = objectScope;
       } else {
         JsScope parentScope = classScopes.get(x.getSuperClass());
@@ -887,6 +887,11 @@ public class GenerateJavaScriptAST {
     public void endVisit(JClassType x, Context ctx) {
       // Don't generate JS for types not in current module if separate compilation is on.
       if (program.isReferenceOnly(x)) {
+        return;
+      }
+
+      if (JProgram.isJsInterfacePrototype(x)) {
+        // Don't generate JS for magic @PrototypeOfJsInterface stubs classes
         return;
       }
 
@@ -1391,7 +1396,7 @@ public class GenerateJavaScriptAST {
         }
         qualifier = names.get(method).makeRef(x.getSourceInfo());
       } else if (x.isStaticDispatchOnly() && method.isConstructor()) {
-        /*
+         /*
          * Constructor calls through {@code this} and {@code super} are always dispatched statically
          * using the constructor function name (constructors are always defined as top level
          * functions).
@@ -1402,13 +1407,15 @@ public class GenerateJavaScriptAST {
         JsName callName = objectScope.declareName("call");
         callName.setObfuscatable(false);
         qualifier = callName.makeRef(x.getSourceInfo());
-        qualifier.setQualifier(names.get(method).makeRef(x.getSourceInfo()));
+        JsNameRef methodRef = names.get(method).makeRef(x.getSourceInfo());
+        qualifier.setQualifier(methodRef);
         jsInvocation.getArguments().add(0, (JsExpression) pop()); // instance
-
-      } else if (x.isStaticDispatchOnly()) {
+        if (JProgram.isJsInterfacePrototype(method.getEnclosingType())) {
+          result = dispatchToSuperPrototype(x, method, qualifier, methodRef, jsInvocation);
+        }
+      } else if (x.isStaticDispatchOnly() && !method.isConstructor()) {
         // Regular super call. This calls are always static and optimizations normally statify them.
         // They can appear in completely unoptimized code, hence need to be handled here.
-        assert !method.isConstructor();
 
         // Construct JCHSU.getPrototypeFor(type).polyname
         // TODO(rluble): Ideally we would want to construct the inheritance chain the JS way and
@@ -1430,6 +1437,10 @@ public class GenerateJavaScriptAST {
         qualifier = callName.makeRef(x.getSourceInfo());
         qualifier.setQualifier(methodNameRef);
         jsInvocation.getArguments().add(0, (JsExpression) pop()); // instance
+        // Is this method targeting a Foo_Prototype class?
+        if (JProgram.isJsInterfacePrototype(method.getEnclosingType())) {
+          result = dispatchToSuperPrototype(x, method, qualifier, methodNameRef, jsInvocation);
+        }
         // Is this method targeting a Foo_Prototype class?
         if (JProgram.isJsInterfacePrototype(method.getEnclosingType())) {
           result = dispatchToSuperPrototype(x, method, qualifier, methodNameRef, jsInvocation);
@@ -1820,6 +1831,12 @@ public class GenerateJavaScriptAST {
       if (program.isReferenceOnly(x)) {
         return false;
       }
+
+      // Don't generate JS for magic @PrototypeOfJsInterface classes
+      if (JProgram.isJsInterfacePrototype(x)) {
+        return false;
+      }
+
       if (alreadyRan.contains(x)) {
         return false;
       }

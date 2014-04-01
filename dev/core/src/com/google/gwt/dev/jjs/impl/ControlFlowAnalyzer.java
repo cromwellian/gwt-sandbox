@@ -420,6 +420,18 @@ public class ControlFlowAnalyzer {
         }
       }
 
+      // rescue any single-abstract-methods flowing into JsInterface methods (lambdas which might be invoked)
+      if (program.typeOracle.isJsInterfaceMethod(method)) {
+        for (JParameter param : method.getParams()) {
+          if (param.getType() instanceof JDeclaredType) {
+            JMethod singleAbstractMethod = program.getSingleAbstractMethod((JDeclaredType) param.getType());
+            if (singleAbstractMethod != null) {
+              rescue(singleAbstractMethod);
+            }
+          }
+        }
+      }
+
       if (argsToRescueIfParameterRead == null || method.canBePolymorphic()
           || call instanceof JsniMethodRef) {
         return true;
@@ -966,6 +978,8 @@ public class ControlFlowAnalyzer {
     getClassField = program.getIndexedField("Object.___clazz");
     getClassMethod = program.getIndexedMethod("Object.getClass");
     instantiatedTypes.addAll(program.typeOracle.getInstantiatedJsoTypesViaCast());
+    referencedTypes.addAll(
+        program.typeOracle.getInstantiatedJsoTypesViaCast());
     buildMethodsOverriding();
   }
 

@@ -57,6 +57,25 @@ public class ImplementCastsAndTypeChecks {
       JExpression replaceExpr;
       JType toType = x.getCastType();
       JExpression expr = x.getExpr();
+      boolean isJsoCast = false;
+      boolean isJsInterfaceCast = false;
+
+      // Even if disableCastChecking is enabled, we need to rescue JSOs
+      if (toType instanceof JReferenceType && !(toType instanceof JNullType)) {
+        JReferenceType refType = ((JReferenceType) toType).getUnderlyingType();
+
+        isJsoCast = program.typeOracle.willCrossCastLikeJso(refType);
+        isJsInterfaceCast =
+            program.typeOracle.isOrExtendsJsInterface(toType, true);
+
+        if (isJsoCast || isJsInterfaceCast) {
+          if (refType.getName().contains("JsoRandom")) {
+            System.err.println("Instantiating via Cast JsoRandom");
+          }
+          instantiateJsoInterface(refType);
+        }
+      }
+
       if (disableCastChecking && toType instanceof JReferenceType) {
         // Just leave the cast in, GenerateJavaScriptAST will ignore it.
         return;
@@ -87,6 +106,10 @@ public class ImplementCastsAndTypeChecks {
         if (program.typeOracle.canTriviallyCast(argType, refType)) {
           // just remove the cast
           replaceExpr = curExpr;
+        } else if (program.typeOracle.willCrossCastLikeJso(argType)
+            && program.typeOracle.willCrossCastLikeJso(refType)) {
+          // leave the cast instance for Pruner/CFA, remove in GenJSAST
+          return;
         } else if (program.typeOracle.willCrossCastLikeJso(argType) && program.typeOracle
             .willCrossCastLikeJso(refType)) {
           // leave the cast instance for Pruner/CFA, remove in GenJSAST
@@ -94,8 +117,6 @@ public class ImplementCastsAndTypeChecks {
         } else {
           // A cast is still needed.  Substitute the appropriate Cast implementation.
           JMethod method;
-          boolean isJsInterfaceCast = false;
-          boolean isJsoCast = program.typeOracle.willCrossCastLikeJso(refType);
           if (isJsoCast) {
             // A cast to a concrete JSO subtype
             method = program.getIndexedMethod("Cast.dynamicCastJso");
@@ -104,7 +125,12 @@ public class ImplementCastsAndTypeChecks {
             method = program.getIndexedMethod("Cast.dynamicCastAllowJso");
           } else {
             if (program.typeOracle.isOrExtendsJsInterface(toType, true)) {
+            if (isJsInterfaceCast) {
               method = program.getIndexedMethod("Cast.dynamicCastWithPrototype");
+            } else {
+              // A regular cast
+              method = program.getIndexedMethod("Cast.dynamicCast");
+            }
               isJsInterfaceCast = true;
             } else {
               // A regular cast
@@ -125,6 +151,11 @@ public class ImplementCastsAndTypeChecks {
           }
           if (isJsoCast || isJsInterfaceCast) {
             instantiateJsoInterface((JReferenceType) toType);
+          }
+          if (isJsInterfaceCast) {
+            call.addArg(program.getStringLiteral(x.getSourceInfo(),
+                program.typeOracle.getNearestJsInterface(toType,
+                    true).getJsPrototype()));
           }
           replaceExpr = call;
         }

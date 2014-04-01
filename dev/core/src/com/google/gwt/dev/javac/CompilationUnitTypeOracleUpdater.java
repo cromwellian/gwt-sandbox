@@ -752,6 +752,7 @@ public class CompilationUnitTypeOracleUpdater extends TypeOracleUpdater {
         put("F", float.class);
         put("D", double.class);
         put("J", long.class);
+        put("V", void.class);
       } };
 
   static {
