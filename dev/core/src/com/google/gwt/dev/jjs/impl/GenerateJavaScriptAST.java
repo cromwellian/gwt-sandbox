@@ -187,6 +187,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -392,6 +393,30 @@ public class GenerateJavaScriptAST {
     @Override
     public void endVisit(JNameOf x, Context ctx) {
       nameOfTargets.add(x.getNode());
+    }
+  }
+
+  private class FindLambdaTypesEscapingIntoJsInterop extends JVisitor {
+
+    @Override public void endVisit(JMethod x, Context ctx) {
+      if (program.typeOracle.isJsTypeMethod(x)) {
+        for (JType type : x.getOriginalParamTypes()) {
+          maybeRecordLambda(type);
+        }
+        maybeRecordLambda(x.getOriginalReturnType());
+      }
+    }
+
+    private void maybeRecordLambda(JType type) {
+      if (type instanceof JDeclaredType && type instanceof JInterfaceType
+          && ((JInterfaceType) type).isJsFunction() && !jsInteropEscapingLambdaTypes.contains(type)) {
+        JInterfaceType iType = (JInterfaceType) type;
+        if (program.getSingleAbstractMethod(iType) != null) {
+          if (program.typeOracle.isInstantiatedType(iType)) {
+            jsInteropEscapingLambdaTypes.add(iType);
+          }
+        }
+      }
     }
   }
 
@@ -1654,7 +1679,21 @@ public class GenerateJavaScriptAST {
       JsNameRef nameRef = names.get(x.getTarget()).makeRef(x.getSourceInfo());
       JsNew newOp = new JsNew(x.getSourceInfo(), nameRef);
       popList(newOp.getArguments(), x.getArgs().size()); // args
-      push(newOp);
+      JsExpression newExpr = newOp;
+      if (program.typeOracle.isInteropEnabled()) {
+         JMethod sam =  program.getSingleAbstractMethod(x.getClassType());
+         if (sam != null && jsInteropEscapingLambdaTypes.contains(sam.getEnclosingType())) {
+           JsFunction makeLambdaFunc = indexedFunctions.get("JavaClassHierarchySetupUtil.makeLambdaFunction");
+           JsNameRef samFuncNameRef = polymorphicNames.get(sam).makeRef(x.getSourceInfo());
+           JsNameRef protoRef = prototype.makeRef(x.getSourceInfo());
+           samFuncNameRef.setQualifier(protoRef);
+           JsNameRef ctorRef = nameRef.getName().makeRef(x.getSourceInfo());
+           protoRef.setQualifier(ctorRef);
+           // makeLambdaFunction(Foo.prototype.samMethod, new Foo(...))
+           newExpr = new JsInvocation(x.getSourceInfo(), makeLambdaFunc, samFuncNameRef, newOp);
+         }
+      }
+      push(newExpr);
     }
 
     @Override
@@ -3371,6 +3410,8 @@ public class GenerateJavaScriptAST {
 
   private OptionMethodNameDisplayMode.Mode methodNameMappingMode;
 
+  private Set<JDeclaredType> jsInteropEscapingLambdaTypes = new HashSet<JDeclaredType>();
+
   private GenerateJavaScriptAST(TreeLogger logger, JProgram program, JsProgram jsProgram,
       CompilerContext compilerContext, TypeMapper<?> typeMapper,
       Map<StandardSymbolData, JsName> symbolTable, PermProps props) {
@@ -3592,6 +3633,9 @@ public class GenerateJavaScriptAST {
   }
 
   private Pair<JavaToJavaScriptMap, Set<JsNode>> execImpl() {
+    if (program.typeOracle.isInteropEnabled()) {
+      new FindLambdaTypesEscapingIntoJsInterop().accept(program);
+    }
     new FixNameClashesVisitor().accept(program);
     uninitializedValuePotentiallyObservable = optimize ?
         ComputePotentiallyObservableUninitializedValues.analyze(program) : Predicates.<JField>alwaysTrue();

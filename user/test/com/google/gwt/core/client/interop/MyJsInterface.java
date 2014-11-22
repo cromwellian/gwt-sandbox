@@ -43,6 +43,14 @@ interface MyJsInterface {
 
   int sum(int bias);
 
+  String go(JsCallback<String> cb);
+
+
+  @JsType
+  interface JsCallback<T> {
+    T doIt(T arg);
+  }
+
   @PrototypeOfJsType
   static class Prototype implements MyJsInterface {
 
@@ -68,6 +76,10 @@ interface MyJsInterface {
     @Override
     public int sum(int bias) {
       return 0;
+    }
+
+    @Override public String go(JsCallback<String> cb) {
+      return null;
     }
   }
 }

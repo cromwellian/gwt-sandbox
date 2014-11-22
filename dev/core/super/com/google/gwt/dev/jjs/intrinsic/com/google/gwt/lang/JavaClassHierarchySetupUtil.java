@@ -269,4 +269,10 @@ public class JavaClassHierarchySetupUtil {
    */
   static native void emptyMethod() /*-{
   }-*/;
+
+  public static native JavaScriptObject makeLambdaFunction(JavaScriptObject delegate, JavaScriptObject instance) /*-{
+    var lambda = function() { return delegate.apply(instance, arguments); }
+    lambda.__proto__ = instance;
+    return lambda;
+  }-*/;
 }

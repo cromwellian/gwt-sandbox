@@ -29,7 +29,7 @@ public class JsTypeTest extends GWTTestCase {
   protected void gwtSetUp() throws Exception {
     ScriptInjector.fromString("function MyJsInterface() {}\n" +
       "MyJsInterface.prototype.sum = function sum(bias) { return this.x + this.y + bias; }\n" +
-      "MyJsInterface.prototype.go = function(cb) { cb('Hello'); }")
+      "MyJsInterface.prototype.go = function(cb) { return cb('Hello'); }")
         .setWindow(ScriptInjector.TOP_WINDOW).inject();
     ScriptInjector.fromString("function MyJsInterface() {}\n" +
         "MyJsInterface.prototype.sum = function sum(bias) { return this.x + this.y +   bias; }\n")
@@ -210,6 +210,11 @@ public class JsTypeTest extends GWTTestCase {
 
     // check that it doesn't work if $wnd is forced
     assertFalse(localMyClass() instanceof MyJsInterface);
+  }
+
+  public void testSamConversion() {
+    MyJsInterface jsInterface = (MyJsInterface) mainMyClass();
+    assertEquals("Hello", jsInterface.go(x -> x));
   }
 
   static native boolean isIE8() /*-{

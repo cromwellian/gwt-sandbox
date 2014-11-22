@@ -25,8 +25,18 @@ import java.io.Serializable;
  */
 public class JInterfaceType extends JDeclaredType {
 
+  private boolean jsFunction;
+
   public JInterfaceType(SourceInfo info, String name, JsInteropType interopType, String jsPrototype) {
     super(info, name, interopType, jsPrototype);
+  }
+
+  public void setJsFunction(boolean jsFunction) {
+    this.jsFunction = jsFunction;
+  }
+
+  public boolean isJsFunction() {
+    return jsFunction;
   }
 
   private static class ExternalSerializedForm implements Serializable {
